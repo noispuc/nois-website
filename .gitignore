@@ -1,0 +1,18 @@
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos do Figma (se houver)
+*.fig
+*.tmp
+
+# Editores
+.vscode/
+.idea/
+
+# Arquivos de backup
+*.bak
+*.backup
+
+# Pasta de node_modules (se usar algum build tool no futuro)
+node_modules/
