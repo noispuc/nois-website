@@ -2,8 +2,8 @@
 // CONFIGURAÇÃO DOS LINKS PÚBLICOS
 // ============================================
 const SHEETS_CONFIG = {
-    equipe: 'https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/export?format=csv&gid=0',
-    projetos: 'https://docs.google.com/spreadsheets/d/SEU_ID_AQUI/export?format=csv&gid=1',
+    equipe: '../csv/equipe.csv',
+    projetos: '../csv/projetos.csv',
     publicacoes: '../csv/publicacoes.csv'
 };
 
@@ -60,22 +60,24 @@ async function carregarCSV(url) {
 // EQUIPE
 // ============================================
 async function carregarEquipe() {
-    const todos = await carregarCSV(SHEETS_CONFIG.equipe);
-    // Filtra apenas membros com status = "ativo" (case insensitive)
-    return todos.filter(membro => 
-        membro.status && membro.status.trim().toLowerCase() === 'ativo'
-    );
+    const dados = await carregarCSV(SHEETS_CONFIG.equipe);
+    
+    // Filtra apenas membros ativos (case insensitive)
+    return dados.filter(membro => {
+        const status = membro['status :'] || membro.status || '';
+        return status.trim().toLowerCase() === 'ativo';
+    });
 }
 
 function renderizarEquipe(membros) {
     // Seleciona os containers
     const coordContainer = document.querySelector('.equipe-coordenadores');
-    const pesqContainer = document.querySelector('.equipe-pesquisadores');
+    const pesquisadoresContainer = document.querySelector('.equipe-pesquisadores');
     const icContainer = document.querySelector('.equipe-ic');
     
-    // Limpa os containers antes de renderizar
+    // Limpa os containers
     if (coordContainer) coordContainer.innerHTML = '';
-    if (pesqContainer) pesqContainer.innerHTML = '';
+    if (pesquisadoresContainer) pesquisadoresContainer.innerHTML = '';
     if (icContainer) icContainer.innerHTML = '';
     
     if (!membros || membros.length === 0) {
@@ -85,26 +87,28 @@ function renderizarEquipe(membros) {
     }
     
     membros.forEach(membro => {
-        const cargo = (membro.cargo || '').toLowerCase();
-        let container = null;
-        
-        if (cargo.includes('coord') || cargo.includes('prof')) {
-            container = coordContainer;
-        } else if (cargo.includes('doutor') || cargo.includes('mest') || cargo.includes('pesquisador')) {
-            container = pesqContainer;
-        } else {
-            container = icContainer;
-        }
-        
-        if (!container) return;
-        
-        const nome = membro.Nome || membro.nome || 'Nome não informado';
+        // NOVOS CABEÇALHOS (sem dois pontos)
+        const nome = membro.nome || membro.Nome || 'Nome não informado';
         const cargoTexto = membro.cargo || 'Membro';
-        const area = membro.area || 'Saúde';
+        const equipeCategoria = (membro.equipe || '').trim();
         const lattes = membro.lattes || '';
         const linkedin = membro.linkedin || '';
         const fotoNome = membro.foto || '';
-        const fotoPath = fotoNome ? `assets/images/equipe/${fotoNome}` : null;
+        const fotoPath = fotoNome ? `../assets/images/equipe/${fotoNome}` : null;
+        
+        // Define qual container usar baseado na coluna "equipe"
+        let container = null;
+        if (equipeCategoria.toLowerCase().includes('coord')) {
+            container = coordContainer;
+        } else if (equipeCategoria.toLowerCase().includes('pesquisador')) {
+            container = pesquisadoresContainer;
+        } else if (equipeCategoria.toLowerCase().includes('iniciação') || equipeCategoria.toLowerCase().includes('ic')) {
+            container = icContainer;
+        } else {
+            container = pesquisadoresContainer;
+        }
+        
+        if (!container) return;
         
         const card = document.createElement('div');
         card.className = 'membro-card';
@@ -116,7 +120,6 @@ function renderizarEquipe(membros) {
             </div>
             <h3>${escapeHtml(nome)}</h3>
             <p class="membro-funcao">${escapeHtml(cargoTexto)}</p>
-            <p class="membro-area">Área: ${escapeHtml(area)}</p>
             <div class="membro-links">
                 ${lattes ? `<a href="${escapeHtml(lattes)}" target="_blank" rel="noopener noreferrer">📄 Lattes</a>` : ''}
                 ${linkedin ? `<a href="${escapeHtml(linkedin)}" target="_blank" rel="noopener noreferrer">🔗 LinkedIn</a>` : ''}
@@ -124,17 +127,6 @@ function renderizarEquipe(membros) {
         `;
         container.appendChild(card);
     });
-}
-
-// Função auxiliar para evitar injeção de HTML
-function escapeHtml(texto) {
-    if (!texto) return '';
-    return texto
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
 }
 
 // ============================================
@@ -225,25 +217,27 @@ function configurarFiltros() {
 }
 
 // ============================================
-// PUBLICAÇÕES
+// PUBLICAÇÕES COM BUSCA, FILTROS E PAGINAÇÃO
 // ============================================
 
-// ============================================
-// PUBLICAÇÕES (com CSV local)
-// ============================================
+let todasPublicacoes = [];
+let publicacoesAgrupadas = [];
+let publicacoesFiltradas = [];
+let paginaAtual = 1;
+const itensPorPagina = 20;
 
+// Carregar publicações do CSV
 async function carregarPublicacoes() {
     const dados = await carregarCSV(SHEETS_CONFIG.publicacoes);
     
-    // Remove a primeira linha se for cabeçalho duplicado
     const dadosFiltrados = dados.filter(row => {
-        // Ignora linhas vazias ou com "Publicações" no título
         const titulo = row.Titulo || row.titulo || '';
         return titulo && titulo !== 'Publicações' && titulo !== 'Titulo';
     });
     
-    const agrupadas = {};
+    todasPublicacoes = dadosFiltrados;
     
+    const agrupadas = {};
     dadosFiltrados.forEach(pub => {
         const ano = pub.Ano || pub.ano;
         if (!ano) return;
@@ -251,30 +245,155 @@ async function carregarPublicacoes() {
         agrupadas[ano].push(pub);
     });
     
-    // Ordenar anos decrescentes
-    return Object.keys(agrupadas)
+    publicacoesAgrupadas = Object.keys(agrupadas)
         .sort((a, b) => b - a)
-        .map(ano => ({
-            ano,
-            publicacoes: agrupadas[ano]
-        }));
+        .map(ano => ({ ano, publicacoes: agrupadas[ano] }));
+    
+    publicacoesFiltradas = [...publicacoesAgrupadas];
+    return publicacoesAgrupadas;
 }
 
-function renderizarPublicacoes(publicacoesAgrupadas) {
+// Preencher opções de anos
+function preencherOpcoesAnos() {
+    const container = document.getElementById('ano-options');
+    if (!container || todasPublicacoes.length === 0) return;
+    
+    const anos = [...new Set(todasPublicacoes.map(p => p.Ano || p.ano))];
+    anos.sort((a, b) => b - a);
+    
+    // Manter a opção "Todos os anos" no topo
+    const todosOption = container.querySelector('.select-option[data-ano="todos"]');
+    container.innerHTML = '';
+    container.appendChild(todosOption);
+    
+    anos.forEach(ano => {
+        const label = document.createElement('label');
+        label.className = 'select-option';
+        label.setAttribute('data-ano', ano);
+        label.innerHTML = `<input type="radio" name="ano" value="${ano}"> ${ano}`;
+        container.appendChild(label);
+    });
+    
+    // Busca nos anos
+    const buscaAnoInput = document.getElementById('busca-ano-input');
+    if (buscaAnoInput) {
+        buscaAnoInput.addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            const anosFiltrados = anos.filter(ano => ano.toString().includes(termo));
+            
+            container.innerHTML = '';
+            container.appendChild(todosOption);
+            anosFiltrados.forEach(ano => {
+                const label = document.createElement('label');
+                label.className = 'select-option';
+                label.setAttribute('data-ano', ano);
+                label.innerHTML = `<input type="radio" name="ano" value="${ano}"> ${ano}`;
+                container.appendChild(label);
+            });
+        });
+    }
+}
+
+// Obter ano selecionado
+function getAnoSelecionado() {
+    const selected = document.querySelector('input[name="ano"]:checked');
+    return selected ? selected.value : 'todos';
+}
+
+// Aplicar filtros
+function aplicarFiltros() {
+    const termoBusca = document.getElementById('busca-input')?.value.toLowerCase() || '';
+    const anoSelecionado = getAnoSelecionado();
+    
+    let filtradas = [...todasPublicacoes];
+    
+    if (termoBusca) {
+        filtradas = filtradas.filter(pub => {
+            const titulo = (pub.Titulo || pub.titulo || '').toLowerCase();
+            const autores = (pub.Autores || pub.autores || '').toLowerCase();
+            const veiculo = (pub.Modelo || pub.modelo || '').toLowerCase();
+            return titulo.includes(termoBusca) || autores.includes(termoBusca) || veiculo.includes(termoBusca);
+        });
+    }
+    
+    if (anoSelecionado !== 'todos') {
+        filtradas = filtradas.filter(pub => (pub.Ano || pub.ano || '').toString() === anoSelecionado);
+    }
+    
+    const agrupadas = {};
+    filtradas.forEach(pub => {
+        const ano = pub.Ano || pub.ano;
+        if (!ano) return;
+        if (!agrupadas[ano]) agrupadas[ano] = [];
+        agrupadas[ano].push(pub);
+    });
+    
+    publicacoesFiltradas = Object.keys(agrupadas)
+        .sort((a, b) => b - a)
+        .map(ano => ({ ano, publicacoes: agrupadas[ano] }));
+    
+    paginaAtual = 1;
+    renderizarPublicacoes();
+}
+
+// Limpar filtros
+function limparFiltros() {
+    document.getElementById('busca-input').value = '';
+    document.getElementById('busca-ano-input').value = '';
+    const todosRadio = document.querySelector('input[name="ano"][value="todos"]');
+    if (todosRadio) todosRadio.checked = true;
+    
+    publicacoesFiltradas = [...publicacoesAgrupadas];
+    paginaAtual = 1;
+    renderizarPublicacoes();
+    
+    // Re-renderizar opções de anos
+    preencherOpcoesAnos();
+}
+
+// Renderizar publicações com paginação
+function renderizarPublicacoes() {
     const container = document.querySelector('.publicacoes-lista');
     const loader = document.getElementById('loader-publicacoes');
     
     if (!container) return;
     if (loader) loader.style.display = 'none';
     
-    if (!publicacoesAgrupadas || publicacoesAgrupadas.length === 0) {
+    if (!publicacoesFiltradas || publicacoesFiltradas.length === 0) {
         container.innerHTML = '<p class="sem-dados">Nenhuma publicação encontrada.</p>';
         return;
     }
     
+    let todasPublicacoesLista = [];
+    publicacoesFiltradas.forEach(grupo => {
+        grupo.publicacoes.forEach(pub => {
+            todasPublicacoesLista.push({ ano: grupo.ano, ...pub });
+        });
+    });
+    
+    const total = todasPublicacoesLista.length;
+    const totalPaginas = Math.ceil(total / itensPorPagina);
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const publicacoesPagina = todasPublicacoesLista.slice(inicio, fim);
+    
+    const agrupadasPagina = {};
+    publicacoesPagina.forEach(pub => {
+        const ano = pub.ano;
+        if (!agrupadasPagina[ano]) agrupadasPagina[ano] = [];
+        agrupadasPagina[ano].push(pub);
+    });
+    
+    const gruposOrdenados = Object.keys(agrupadasPagina)
+        .sort((a, b) => b - a)
+        .map(ano => ({ ano, publicacoes: agrupadasPagina[ano] }));
+    
     container.innerHTML = '';
     
-    publicacoesAgrupadas.forEach(grupo => {
+    // Paginação top
+    container.appendChild(gerarPaginacaoHTML(paginaAtual, totalPaginas, total, inicio, fim, true));
+    
+    gruposOrdenados.forEach(grupo => {
         const anoSection = document.createElement('div');
         anoSection.className = 'publicacoes-ano';
         anoSection.innerHTML = `<h2>📅 ${grupo.ano}</h2>`;
@@ -283,7 +402,6 @@ function renderizarPublicacoes(publicacoesAgrupadas) {
         lista.className = 'publicacoes-lista-ano';
         
         grupo.publicacoes.forEach(pub => {
-            // Mapeamento correto para seu CSV
             const titulo = pub.Titulo || pub.titulo || 'Sem título';
             const autores = pub.Autores || pub.autores || 'Autores não informados';
             const veiculo = pub['Modelo: '] || pub.Modelo || pub.modelo || 'Publicação';
@@ -295,7 +413,7 @@ function renderizarPublicacoes(publicacoesAgrupadas) {
                 <span class="autores">${escapeHtml(autores)}</span>
                 <div>
                     <span class="veiculo">📖 ${escapeHtml(veiculo)}</span>
-                    ${doi ? `<a href="${escapeHtml(doi)}" target="_blank" rel="noopener noreferrer" class="doi-link">🔗 DOI/Link</a>` : ''}
+                    ${doi ? `<a href="${escapeHtml(doi)}" target="_blank" class="doi-link">🔗 Acessar</a>` : ''}
                 </div>
             `;
             lista.appendChild(item);
@@ -304,25 +422,142 @@ function renderizarPublicacoes(publicacoesAgrupadas) {
         anoSection.appendChild(lista);
         container.appendChild(anoSection);
     });
+    
+    // Paginação bottom
+    container.appendChild(gerarPaginacaoHTML(paginaAtual, totalPaginas, total, inicio, fim, false));
+    
+    document.querySelectorAll('.btn-pagina').forEach(btn => {
+        btn.addEventListener('click', () => {
+            paginaAtual = parseInt(btn.dataset.pagina);
+            renderizarPublicacoes();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+}
+
+function gerarPaginacaoHTML(pagina, totalPaginas, total, inicio, fim, isTop) {
+    const div = document.createElement('div');
+    div.className = `paginacao-controles ${isTop ? 'paginacao-top' : 'paginacao-bottom'}`;
+    
+    let html = `<div class="paginacao-info">📄 Mostrando ${inicio + 1}-${Math.min(fim, total)} de ${total} publicações</div>`;
+    html += '<div class="paginacao-botoes">';
+    
+    if (pagina > 1) {
+        html += `<button class="btn-pagina" data-pagina="${pagina - 1}">◀ Anterior</button>`;
+    }
+    
+    let inicioPaginas = Math.max(1, pagina - 2);
+    let fimPaginas = Math.min(totalPaginas, pagina + 2);
+    
+    if (inicioPaginas > 1) {
+        html += `<button class="btn-pagina" data-pagina="1">1</button>`;
+        if (inicioPaginas > 2) html += `<span class="paginacao-pontos">...</span>`;
+    }
+    
+    for (let i = inicioPaginas; i <= fimPaginas; i++) {
+        if (i === pagina) {
+            html += `<button class="btn-pagina ativo" data-pagina="${i}">${i}</button>`;
+        } else {
+            html += `<button class="btn-pagina" data-pagina="${i}">${i}</button>`;
+        }
+    }
+    
+    if (fimPaginas < totalPaginas) {
+        if (fimPaginas < totalPaginas - 1) html += `<span class="paginacao-pontos">...</span>`;
+        html += `<button class="btn-pagina" data-pagina="${totalPaginas}">${totalPaginas}</button>`;
+    }
+    
+    if (pagina < totalPaginas) {
+        html += `<button class="btn-pagina" data-pagina="${pagina + 1}">Próximo ▶</button>`;
+    }
+    
+    html += '</div>';
+    div.innerHTML = html;
+    return div;
+}
+
+// Inicializar dropdown customizado
+function initCustomSelect() {
+    const trigger = document.getElementById('ano-select-trigger');
+    const container = document.getElementById('ano-select-container');
+    
+    if (!trigger || !container) return;
+    
+    trigger.addEventListener('click', () => {
+        container.classList.toggle('open');
+    });
+    
+    // Fechar ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!container.contains(e.target)) {
+            container.classList.remove('open');
+        }
+    });
+    
+    // Atualizar texto do trigger quando selecionar um ano
+    document.addEventListener('change', (e) => {
+        if (e.target.name === 'ano') {
+            const selectedValue = e.target.value;
+            const triggerSpan = trigger.querySelector('span:first-child');
+            if (selectedValue === 'todos') {
+                triggerSpan.innerHTML = '📅 Todos os anos';
+            } else {
+                triggerSpan.innerHTML = `📅 ${selectedValue}`;
+            }
+            container.classList.remove('open');
+            aplicarFiltros();
+        }
+    });
+}
+
+// ============================================
+// FUNÇÃO AUXILIAR ESCAPE HTML
+// ============================================
+function escapeHtml(texto) {
+    if (!texto) return '';
+    return texto
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 // ============================================
 // INICIALIZAÇÃO POR PÁGINA
 // ============================================
-// Detecta qual página está carregada baseado no body ID
 async function inicializarPagina() {
     const bodyId = document.body.id || '';
+    console.log(`Inicializando página: ${bodyId}`);
     
     if (bodyId === 'pagina-equipe') {
         const membros = await carregarEquipe();
         renderizarEquipe(membros);
+        
     } else if (bodyId === 'pagina-projetos') {
         const projetos = await carregarProjetos();
         renderizarProjetos(projetos, 'todos');
         configurarFiltros();
+        
     } else if (bodyId === 'pagina-publicacoes') {
-        const pubs = await carregarPublicacoes();
-        renderizarPublicacoes(pubs);
+    console.log('Carregando publicações...');
+    
+    await carregarPublicacoes();
+    preencherOpcoesAnos();
+    initCustomSelect();
+    
+    document.getElementById('buscar-btn')?.addEventListener('click', aplicarFiltros);
+    document.getElementById('busca-input')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') aplicarFiltros();
+    });
+    document.getElementById('limpar-filtros-btn')?.addEventListener('click', limparFiltros);
+    
+    renderizarPublicacoes();
+        
+    } else if (bodyId === 'pagina-contato') {
+        console.log('Página de contato - sem inicialização dinâmica');
+    } else {
+        console.log('Página sem inicialização específica (provavelmente index ou sobre)');
     }
 }
 

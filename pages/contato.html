@@ -31,7 +31,7 @@
 
     <main>
         <!-- Hero da página -->
-        <section class="page-hero">
+        <section class="hero">
             <div class="container">
                 <h1>Entre em Contato</h1>
                 <p>Estamos abertos a colaborações, parcerias e oportunidades de pesquisa</p>
@@ -45,7 +45,12 @@
                     <!-- Coluna Esquerda: Formulário -->
                     <div class="contato-formulario">
                         <h2>Envie uma mensagem</h2>
-                        <form id="form-contato" action="https://formspree.io/f/xgvogqdp" method="POST">
+                        <form id="form-contato" action="https://formsubmit.co/nois@puc-rio.br" method="POST">
+
+                            <input type="hidden" name="_captcha" value="false">
+                            <input type="hidden" name="_next" value="https://nois.puc-rio.br/obrigado.html">
+                            <input type="hidden" name="_subject" value="Contato pelo Site NOIS">
+                            
                             <div class="form-group">
                                 <label for="nome">Nome completo *</label>
                                 <input type="text" id="nome" name="nome" required>

@@ -31,18 +31,50 @@
 
     <main>
         <!-- Hero da página -->
-        <section class="page-hero">
+        <section class="hero">
             <div class="container">
                 <h1>Publicações Científicas</h1>
                 <p>Artigos, periódicos e conferências do NOIS</p>
             </div>
         </section>
 
-        <!-- Lista de Publicações (preenchida pelo JavaScript) -->
+        <!-- Barra de Busca e Filtros -->
+        <section class="filtros-publicacoes">
+            <div class="container">
+                <div class="filtros-linha">
+                    <div class="busca-container">
+                        <input type="text" id="busca-input" placeholder="🔍 Buscar por título, autor ou periódico..." class="busca-input">
+                        <button id="buscar-btn" class="buscar-btn">Buscar</button>
+                    </div>
+                    
+                    <div class="filtros-acoes">
+                        <div class="custom-select" id="ano-select-container">
+                            <button type="button" class="select-trigger" id="ano-select-trigger">
+                                <span>📅 Todos os anos</span>
+                                <span class="select-arrow">▼</span>
+                            </button>
+                            <div class="select-dropdown" id="ano-select-dropdown">
+                                <input type="text" id="busca-ano-input" placeholder="🔍 Buscar ano..." class="busca-ano-input">
+                                <div class="select-options" id="ano-options">
+                                    <label class="select-option" data-ano="todos">
+                                        <input type="radio" name="ano" value="todos" checked> 📅 Todos os anos
+                                    </label>
+                                    <!-- Os anos serão preenchidos via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        <button id="limpar-filtros-btn" class="limpar-filtros-btn">🗑️ Limpar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lista de Publicações (renderizada pelo JavaScript) -->
         <section class="publicacoes-section">
             <div class="container">
-                <div class="publicacoes-lista"></div>
-                <div class="loader" id="loader-publicacoes">Carregando publicações...</div>
+                <div class="publicacoes-lista" id="publicacoes-lista">
+                    <div id="loader-publicacoes" class="loader">Carregando publicações...</div>
+                </div>
             </div>
         </section>
     </main>
