@@ -17,6 +17,15 @@ body {
     padding: 0 20px;
 }
 
+/* Acessibilidade */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(0, 163, 163, 0.35);
+    outline-offset: 3px;
+}
+
 /* Header */
 .header {
     background-color: #ffffff;
@@ -48,12 +57,6 @@ body {
     display: block;
 }
 
-@media (max-width: 768px) {
-    .logo-img {
-        height: 40px;
-    }
-}
-
 .nav {
     display: flex;
     gap: 24px;
@@ -79,10 +82,37 @@ body {
     font-weight: 600;
 }
 
-.idiomas a {
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    color: #1a2b4c;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.hamburger:hover {
+    background-color: #f1f5f9;
+}
+
+.idiomas {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     color: #4a5568;
-    text-decoration: none;
     font-weight: 500;
+}
+
+.idioma-ativo {
+    color: #1a2b4c;
+    font-weight: 700;
+}
+
+.idioma-desabilitado {
+    color: #94a3b8;
+    cursor: not-allowed;
 }
 
 /* Hero */
@@ -117,6 +147,7 @@ body {
     overflow: hidden;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #f1f5f9;
 }
 
 .slider-track {
@@ -133,6 +164,7 @@ body {
     width: 100%;
     height: 400px;
     object-fit: cover;
+    display: block;
 }
 
 .slide-caption {
@@ -188,9 +220,11 @@ body {
     width: 10px;
     height: 10px;
     background: rgba(255,255,255,0.5);
+    border: none;
     border-radius: 50%;
     cursor: pointer;
     transition: background 0.3s;
+    padding: 0;
 }
 
 .dot.active {
@@ -331,16 +365,21 @@ body {
     margin-bottom: 8px;
 }
 
+.footer-contato a,
 .footer-links a {
-    display: block;
     color: #cbd5e0;
     text-decoration: none;
-    margin-bottom: 8px;
     transition: color 0.3s;
 }
 
+.footer-contato a:hover,
 .footer-links a:hover {
-    color: #00a3a3;
+    color: #2ce6c7;
+}
+
+.footer-links a {
+    display: block;
+    margin-bottom: 8px;
 }
 
 .footer-copyright {
@@ -388,14 +427,16 @@ body {
     margin-bottom: 16px;
 }
 
-.missao-card, .visao-card {
+.missao-card,
+.visao-card {
     background: #f8f9fa;
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 24px;
 }
 
-.missao-card h3, .visao-card h3 {
+.missao-card h3,
+.visao-card h3 {
     color: #1a2b4c;
     margin-bottom: 12px;
 }
@@ -419,12 +460,22 @@ body {
 }
 
 .parceria-card {
+    display: inline-block;
     background: white;
     padding: 16px 32px;
     border-radius: 40px;
     font-weight: 600;
     color: #1a2b4c;
+    text-decoration: none;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.parceria-card:hover {
+    transform: translateY(-2px);
+    background: #00a3a3;
+    color: white;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
 }
 
 /* Localização */
@@ -460,6 +511,15 @@ body {
 
 .endereco strong {
     color: #1a2b4c;
+}
+
+.endereco a {
+    color: #00a3a3;
+    text-decoration: none;
+}
+
+.endereco a:hover {
+    text-decoration: underline;
 }
 
 .mapa-interativo iframe {
@@ -558,6 +618,7 @@ body {
     justify-content: center;
     gap: 16px;
     margin-top: 12px;
+    flex-wrap: wrap;
 }
 
 .membro-links a {
@@ -646,6 +707,22 @@ body {
     justify-content: center;
     color: white;
     font-size: 3rem;
+    overflow: hidden;
+}
+
+.projeto-imagem img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.projeto-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .projeto-card h3 {
@@ -691,21 +768,40 @@ body {
     color: #d97706;
 }
 
+.projeto-descricao,
+.projeto-equipe,
+.projeto-ano {
+    padding: 0 20px;
+    margin-bottom: 10px;
+    color: #334155;
+}
+
+.projeto-descricao {
+    margin-top: 8px;
+}
+
 .projeto-link {
     display: inline-block;
-    margin: 0 20px 20px 20px;
+    margin: 8px 20px 20px 20px;
     padding: 8px 16px;
     background: #f1f5f9;
     color: #1a2b4c;
     text-decoration: none;
     border-radius: 8px;
     font-size: 0.8rem;
-    transition: background 0.3s;
+    transition: background 0.3s, color 0.3s;
 }
 
 .projeto-link:hover {
     background: #00a3a3;
     color: white;
+}
+
+.projeto-link-indisponivel,
+.projeto-link-indisponivel:hover {
+    background: #f1f5f9;
+    color: #475569;
+    cursor: default;
 }
 
 /* PÁGINA PUBLICAÇÕES */
@@ -910,7 +1006,8 @@ body {
     color: white;
 }
 
-.loader, .sem-dados {
+.loader,
+.sem-dados {
     text-align: center;
     padding: 40px;
     color: #64748b;
@@ -1012,6 +1109,16 @@ body {
     background: #008787;
 }
 
+.btn-enviar:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.form-status {
+    margin-top: 12px;
+    font-size: 0.9rem;
+}
+
 .info-card {
     display: flex;
     gap: 16px;
@@ -1036,6 +1143,14 @@ body {
     text-decoration: none;
 }
 
+.info-texto a:hover {
+    text-decoration: underline;
+}
+
+.info-social {
+    margin-top: 24px;
+}
+
 .social-links {
     display: flex;
     gap: 16px;
@@ -1050,12 +1165,25 @@ body {
     text-decoration: none;
     border-radius: 40px;
     font-size: 0.85rem;
-    transition: background 0.3s;
+    transition: background 0.3s, color 0.3s;
 }
 
-.social-link:hover {
+a.social-link:hover {
     background: #00a3a3;
     color: white;
+}
+
+.social-link-disabled,
+.social-link-disabled:hover {
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+.social-observacao {
+    margin-top: 10px;
+    color: #64748b;
+    font-size: 0.85rem;
 }
 
 /* Seção Missão e Visão com Vídeo (Index) */
@@ -1109,6 +1237,31 @@ body {
 
 /* Responsividade */
 @media (max-width: 768px) {
+    .logo-img {
+        height: 40px;
+    }
+
+    .header .container {
+        gap: 12px;
+    }
+
+    .nav {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        gap: 8px;
+        order: 4;
+    }
+
+    .nav a {
+        text-align: center;
+    }
+
+    .idiomas {
+        margin-left: auto;
+    }
+
     .cards-grid,
     .areas-grid,
     .footer-content,
@@ -1117,58 +1270,60 @@ body {
     .missao-visao-textos {
         grid-template-columns: 1fr;
     }
-    
-    .nav {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 16px;
-    }
-    
+
     .hero h1,
     .page-hero h1 {
         font-size: 2rem;
     }
-    
+
     .local-grid {
         grid-template-columns: 1fr;
         gap: 32px;
     }
-    
+
     .localizacao h2 {
         text-align: center;
     }
-    
+
     .mapa-interativo iframe {
         height: 300px;
     }
-    
+
     .projetos-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .equipe-coordenadores,
     .equipe-pesquisadores,
     .equipe-ic {
         grid-template-columns: 1fr;
     }
-    
+
     .filtros-linha {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
+    .busca-container {
+        flex-direction: column;
+    }
+
+    .buscar-btn {
+        padding: 10px 24px;
+    }
+
     .filtros-acoes {
         justify-content: space-between;
     }
-    
+
     .custom-select {
         flex: 1;
     }
-    
+
     .slide img {
         height: 250px;
     }
-    
+
     .footer-content {
         grid-template-columns: 1fr;
         gap: 32px;
@@ -1177,14 +1332,44 @@ body {
 }
 
 @media (max-width: 480px) {
+    .hero {
+        padding: 28px 16px;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    .container {
+        padding: 0 16px;
+    }
+
+    .projetos-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .projeto-card h3,
+    .projeto-tags,
+    .projeto-descricao,
+    .projeto-equipe,
+    .projeto-ano {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .projeto-link {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+
     .filtros-acoes {
         flex-direction: column;
     }
-    
+
     .custom-select {
         width: 100%;
     }
-    
+
     .limpar-filtros-btn {
         width: 100%;
         text-align: center;
