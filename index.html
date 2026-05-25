@@ -16,11 +16,12 @@
     <header class="header">
         <div class="container">
             <div class="logo">
-            <a href="../">
-                <img src="./assets/images/nois.jpeg" alt="NOIS - PUC-Rio" class="logo-img">
-            </a>
+                <a href="./" aria-label="Página inicial do NOIS">
+                    <img src="./assets/images/nois.jpeg" alt="NOIS - PUC-Rio" class="logo-img">
+                </a>
             </div>
-            <nav class="nav">
+
+            <nav class="nav" aria-label="Menu principal">
                 <a href="./" class="active">Início</a>
                 <a href="./pages/sobre.html">Sobre</a>
                 <a href="./pages/equipe.html">Equipe</a>
@@ -28,8 +29,13 @@
                 <a href="./pages/publicacoes.html">Publicações</a>
                 <a href="./pages/contato.html">Contato</a>
             </nav>
-            <div class="idiomas">
-                <a href="#">PT</a> | <a href="#">EN</a> | <a href="#">ES</a>
+
+            <div class="idiomas" aria-label="Idiomas disponíveis">
+                <span class="idioma-ativo">PT</span>
+                <span aria-hidden="true">|</span>
+                <span class="idioma-desabilitado" title="Versão em inglês ainda não disponível">EN</span>
+                <span aria-hidden="true">|</span>
+                <span class="idioma-desabilitado" title="Versão em espanhol ainda não disponível">ES</span>
             </div>
         </div>
     </header>
@@ -48,7 +54,7 @@
     <section class="banner-section">
         <div class="container">
             <div class="slider-container" id="bannerSlider">
-                <!-- As imagens serão carregadas automaticamente da pasta assets/images/banner/ -->
+                <!-- As imagens serão carregadas automaticamente pelo JavaScript -->
                 <div class="slider-loading">Carregando banners...</div>
             </div>
         </div>
@@ -109,16 +115,19 @@
                     <h3>Gestão de Operações em Saúde</h3>
                     <p>Otimização de recursos e processos em sistemas de saúde</p>
                 </div>
+
                 <div class="area-card">
                     <div class="area-icon">🏥</div>
                     <h3>Avaliação e Preparo de Sistemas de Saúde</h3>
                     <p>Análise da capacidade e resiliência de sistemas</p>
                 </div>
+
                 <div class="area-card">
                     <div class="area-icon">📈</div>
                     <h3>Intervenções e Análise de Políticas Públicas</h3>
                     <p>Avaliação de impacto de políticas em saúde</p>
                 </div>
+
                 <div class="area-card">
                     <div class="area-icon">🤖</div>
                     <h3>Healthcare Analytics e IA</h3>
@@ -135,20 +144,29 @@
                 <div class="footer-info">
                     <h3>NOIS - PUC-Rio</h3>
                     <p>Núcleo de Operações e Inteligência em Saúde</p>
-                    <p>Ed. Pe. Belizario, Térreo<br>R. Marquês de São Vicente, 225 - Gávea<br>Rio de Janeiro - RJ</p>
+                    <p>
+                        Ed. Pe. Belizario, Térreo<br>
+                        R. Marquês de São Vicente, 225 - Gávea<br>
+                        Rio de Janeiro - RJ
+                    </p>
                 </div>
+
                 <div class="footer-contato">
                     <h4>Contato</h4>
-                    <p>📧 nois@puc-rio.br</p>
-                    <p>📞 +55 (21) 3527-1500</p>
+                    <p>📧 <a href="mailto:nois@puc-rio.br">nois@puc-rio.br</a></p>
+                    <p>📞 <a href="tel:+552135271500">+55 (21) 3527-1500</a></p>
                 </div>
+
                 <div class="footer-links">
                     <h4>Links Rápidos</h4>
-                    <a href="/sobre.html">Sobre</a>
-                    <a href="/equipe.html">Equipe</a>
-                    <a href="/publicacoes.html">Publicações</a>
+                    <a href="./pages/sobre.html">Sobre</a>
+                    <a href="./pages/equipe.html">Equipe</a>
+                    <a href="./pages/projetos.html">Projetos</a>
+                    <a href="./pages/publicacoes.html">Publicações</a>
+                    <a href="./pages/contato.html">Contato</a>
                 </div>
             </div>
+
             <div class="footer-copyright">
                 <p>&copy; 2026 NOIS - PUC-Rio. Todos os direitos reservados.</p>
             </div>

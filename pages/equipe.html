@@ -11,11 +11,12 @@
     <header class="header">
         <div class="container">
             <div class="logo">
-            <a href="../">
-                <img src="../assets/images/nois.jpeg" alt="NOIS - PUC-Rio" class="logo-img">
-            </a>
+                <a href="../" aria-label="Página inicial do NOIS">
+                    <img src="../assets/images/nois.jpeg" alt="NOIS - PUC-Rio" class="logo-img">
+                </a>
             </div>
-            <nav class="nav">
+
+            <nav class="nav" aria-label="Menu principal">
                 <a href="../">Início</a>
                 <a href="../pages/sobre.html">Sobre</a>
                 <a href="../pages/equipe.html" class="active">Equipe</a>
@@ -23,8 +24,13 @@
                 <a href="../pages/publicacoes.html">Publicações</a>
                 <a href="../pages/contato.html">Contato</a>
             </nav>
-            <div class="idiomas">
-                <a href="#">PT</a> | <a href="#">EN</a> | <a href="#">ES</a>
+
+            <div class="idiomas" aria-label="Idiomas disponíveis">
+                <span class="idioma-ativo">PT</span>
+                <span aria-hidden="true">|</span>
+                <span class="idioma-desabilitado" title="Versão em inglês ainda não disponível">EN</span>
+                <span aria-hidden="true">|</span>
+                <span class="idioma-desabilitado" title="Versão em espanhol ainda não disponível">ES</span>
             </div>
         </div>
     </header>
@@ -38,27 +44,27 @@
             </div>
         </section>
 
-        <!-- Coordenação (preenchido pelo JavaScript) -->
-        <section class="equipe-categoria">
+        <!-- Coordenação preenchida pelo JavaScript -->
+        <section class="equipe-categoria" aria-labelledby="titulo-coordenacao">
             <div class="container">
-                <h2 class="categoria-titulo">🎯 Coordenação</h2>
-                <div class="equipe-coordenadores"></div>
+                <h2 class="categoria-titulo" id="titulo-coordenacao">🎯 Coordenação</h2>
+                <div class="equipe-coordenadores" aria-live="polite"></div>
             </div>
         </section>
 
-        <!-- Pesquisadores Associados (preenchido pelo JavaScript) -->
-        <section class="equipe-categoria bg-claro">
+        <!-- Pesquisadores Associados preenchidos pelo JavaScript -->
+        <section class="equipe-categoria bg-claro" aria-labelledby="titulo-pesquisadores">
             <div class="container">
-                <h2 class="categoria-titulo">🔬 Pesquisadores Associados</h2>
-                <div class="equipe-pesquisadores"></div>
+                <h2 class="categoria-titulo" id="titulo-pesquisadores">🔬 Pesquisadores Associados</h2>
+                <div class="equipe-pesquisadores" aria-live="polite"></div>
             </div>
         </section>
 
-        <!-- Iniciação Científica (preenchido pelo JavaScript) -->
-        <section class="equipe-categoria">
+        <!-- Iniciação Científica preenchida pelo JavaScript -->
+        <section class="equipe-categoria" aria-labelledby="titulo-ic">
             <div class="container">
-                <h2 class="categoria-titulo">🎓 Iniciação Científica</h2>
-                <div class="equipe-ic"></div>
+                <h2 class="categoria-titulo" id="titulo-ic">🎓 Iniciação Científica</h2>
+                <div class="equipe-ic" aria-live="polite"></div>
             </div>
         </section>
     </main>
@@ -71,25 +77,29 @@
                     <p>Núcleo de Operações e Inteligência em Saúde</p>
                     <p>Departamento de Engenharia Industrial</p>
                 </div>
+
                 <div class="footer-contato">
                     <h4>Contato</h4>
-                    <p>📧 nois@puc-rio.br</p>
-                    <p>📞 +55 (21) 3527-1500</p>
+                    <p>📧 <a href="mailto:nois@puc-rio.br">nois@puc-rio.br</a></p>
+                    <p>📞 <a href="tel:+552135271500">+55 (21) 3527-1500</a></p>
                 </div>
+
                 <div class="footer-links">
                     <h4>Links Rápidos</h4>
                     <a href="../pages/sobre.html">Sobre</a>
                     <a href="../pages/equipe.html">Equipe</a>
                     <a href="../pages/projetos.html">Projetos</a>
                     <a href="../pages/publicacoes.html">Publicações</a>
+                    <a href="../pages/contato.html">Contato</a>
                 </div>
             </div>
+
             <div class="footer-copyright">
                 <p>&copy; 2026 NOIS - PUC-Rio. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
-
+    <script src="../js/main.js"></script>
     <script src="../js/sheets.js"></script>
 </body>
 </html>

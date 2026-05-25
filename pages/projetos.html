@@ -11,11 +11,12 @@
     <header class="header">
         <div class="container">
             <div class="logo">
-            <a href="../">
-                <img src="../assets/images/nois.jpeg" alt="NOIS - PUC-Rio" class="logo-img">
-            </a>
+                <a href="../" aria-label="Página inicial do NOIS">
+                    <img src="../assets/images/nois.jpeg" alt="NOIS - PUC-Rio" class="logo-img">
+                </a>
             </div>
-            <nav class="nav">
+
+            <nav class="nav" aria-label="Menu principal">
                 <a href="../">Início</a>
                 <a href="../pages/sobre.html">Sobre</a>
                 <a href="../pages/equipe.html">Equipe</a>
@@ -23,8 +24,13 @@
                 <a href="../pages/publicacoes.html">Publicações</a>
                 <a href="../pages/contato.html">Contato</a>
             </nav>
-            <div class="idiomas">
-                <a href="#">PT</a> | <a href="#">EN</a> | <a href="#">ES</a>
+
+            <div class="idiomas" aria-label="Idiomas disponíveis">
+                <span class="idioma-ativo">PT</span>
+                <span aria-hidden="true">|</span>
+                <span class="idioma-desabilitado" title="Versão em inglês ainda não disponível">EN</span>
+                <span aria-hidden="true">|</span>
+                <span class="idioma-desabilitado" title="Versão em espanhol ainda não disponível">ES</span>
             </div>
         </div>
     </header>
@@ -38,21 +44,21 @@
             </div>
         </section>
 
-        <!-- Filtros (opcional) -->
-        <section class="filtros-projetos">
+        <!-- Filtros de projetos -->
+        <section class="filtros-projetos" aria-label="Filtros de projetos">
             <div class="container">
                 <div class="filtros-buttons">
-                    <button class="filtro-btn active" data-filtro="todos">📌 Todos</button>
-                    <button class="filtro-btn" data-filtro="ativo">🟢 Ativos</button>
-                    <button class="filtro-btn" data-filtro="concluido">✅ Concluídos</button>
+                    <button type="button" class="filtro-btn active" data-filtro="todos">📌 Todos</button>
+                    <button type="button" class="filtro-btn" data-filtro="ativo">🟢 Ativos</button>
+                    <button type="button" class="filtro-btn" data-filtro="concluido">✅ Concluídos</button>
                 </div>
             </div>
         </section>
 
-        <!-- Grid de Projetos (preenchido pelo JavaScript) -->
+        <!-- Grid de Projetos preenchido pelo JavaScript -->
         <section class="projetos-section">
             <div class="container">
-                <div class="projetos-grid"></div>
+                <div class="projetos-grid" aria-live="polite"></div>
                 <div class="loader" id="loader-projetos">Carregando projetos...</div>
             </div>
         </section>
@@ -66,25 +72,29 @@
                     <p>Núcleo de Operações e Inteligência em Saúde</p>
                     <p>Departamento de Engenharia Industrial</p>
                 </div>
+
                 <div class="footer-contato">
                     <h4>Contato</h4>
-                    <p>📧 nois@puc-rio.br</p>
-                    <p>📞 +55 (21) 3527-1500</p>
+                    <p>📧 <a href="mailto:nois@puc-rio.br">nois@puc-rio.br</a></p>
+                    <p>📞 <a href="tel:+552135271500">+55 (21) 3527-1500</a></p>
                 </div>
+
                 <div class="footer-links">
                     <h4>Links Rápidos</h4>
                     <a href="../pages/sobre.html">Sobre</a>
                     <a href="../pages/equipe.html">Equipe</a>
                     <a href="../pages/projetos.html">Projetos</a>
                     <a href="../pages/publicacoes.html">Publicações</a>
+                    <a href="../pages/contato.html">Contato</a>
                 </div>
             </div>
+
             <div class="footer-copyright">
                 <p>&copy; 2026 NOIS - PUC-Rio. Todos os direitos reservados.</p>
             </div>
         </div>
     </footer>
-
+    <script src="../js/main.js"></script>
     <script src="../js/sheets.js"></script>
 </body>
 </html>
