@@ -545,10 +545,28 @@ textarea:focus-visible {
     text-align: center;
 }
 
+/* Subcategorias da equipe */
+.equipe-subcategoria {
+    margin-top: 2.5rem;
+}
+
+.equipe-subcategoria:first-of-type {
+    margin-top: 1.5rem;
+}
+
+.subcategoria-titulo {
+    font-size: 1.4rem;
+    color: #1a2b4c;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 163, 163, 0.18);
+}
+
 /* Containers da equipe */
 .equipe-coordenadores,
-.equipe-pesquisadores,
-.equipe-ic {
+.equipe-pesquisadores-graduacao,
+.equipe-pesquisadores-posgraduacao,
+.equipe-alumni {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 32px;
@@ -1294,8 +1312,9 @@ a.social-link:hover {
     }
 
     .equipe-coordenadores,
-    .equipe-pesquisadores,
-    .equipe-ic {
+    .equipe-pesquisadores-graduacao,
+    .equipe-pesquisadores-posgraduacao,
+    .equipe-alumni {
         grid-template-columns: 1fr;
     }
 
@@ -1374,4 +1393,28 @@ a.social-link:hover {
         width: 100%;
         text-align: center;
     }
+}
+
+.equipe-subcategoria {
+    margin-top: 2.5rem;
+}
+
+.equipe-subcategoria:first-of-type {
+    margin-top: 1.5rem;
+}
+
+.subcategoria-titulo {
+    font-size: 1.4rem;
+    color: #1a2b4c;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 163, 163, 0.18);
+}
+
+.equipe-pesquisadores-graduacao,
+.equipe-pesquisadores-posgraduacao,
+.equipe-alumni {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
 }

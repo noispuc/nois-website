@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOIS - Equipe | PUC-Rio</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="../assets/images/nois.jpeg" type="image/jpeg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body id="pagina-equipe">
@@ -56,15 +57,24 @@
         <section class="equipe-categoria bg-claro" aria-labelledby="titulo-pesquisadores">
             <div class="container">
                 <h2 class="categoria-titulo" id="titulo-pesquisadores">🔬 Pesquisadores Associados</h2>
-                <div class="equipe-pesquisadores" aria-live="polite"></div>
+
+                <div class="equipe-subcategoria" aria-labelledby="titulo-pesquisadores-graduacao">
+                    <h3 class="subcategoria-titulo" id="titulo-pesquisadores-graduacao">Graduação</h3>
+                    <div class="equipe-pesquisadores-graduacao" aria-live="polite"></div>
+                </div>
+
+                <div class="equipe-subcategoria" aria-labelledby="titulo-pesquisadores-posgraduacao">
+                    <h3 class="subcategoria-titulo" id="titulo-pesquisadores-posgraduacao">Pós-graduação</h3>
+                    <div class="equipe-pesquisadores-posgraduacao" aria-live="polite"></div>
+                </div>
             </div>
         </section>
 
-        <!-- Iniciação Científica preenchida pelo JavaScript -->
-        <section class="equipe-categoria" aria-labelledby="titulo-ic">
+        <!-- Alumni preenchido pelo JavaScript -->
+        <section class="equipe-categoria" aria-labelledby="titulo-alumni">
             <div class="container">
-                <h2 class="categoria-titulo" id="titulo-ic">🎓 Iniciação Científica</h2>
-                <div class="equipe-ic" aria-live="polite"></div>
+                <h2 class="categoria-titulo" id="titulo-alumni">🎓 Alumni</h2>
+                <div class="equipe-alumni" aria-live="polite"></div>
             </div>
         </section>
     </main>
@@ -99,6 +109,7 @@
             </div>
         </div>
     </footer>
+
     <script src="../js/main.js"></script>
     <script src="../js/sheets.js"></script>
 </body>
