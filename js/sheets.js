@@ -276,23 +276,147 @@ async function carregarEquipe() {
     const dados = await carregarCSV(SHEETS_CONFIG.equipe, 'equipe');
 
     return dados.filter(membro => {
-        const status = obterCampo(membro, ['status']);
-        return normalizarStatus(status) === 'ativo';
+        const status = normalizarStatus(obterCampo(membro, ['status']));
+        const categoriaEquipe = normalizarTexto(
+            obterCampo(membro, ['equipe', 'grupo', 'categoria'])
+        );
+
+        const statusOcultos = [
+            'oculto',
+            'oculta',
+            'nao_exibir',
+            'nao_exibe',
+            'desativado',
+            'desativada'
+        ];
+
+        if (statusOcultos.includes(status)) {
+            return false;
+        }
+
+        const pertenceAAlumni =
+            categoriaEquipe.includes('alumni') ||
+            categoriaEquipe.includes('alumini') ||
+            categoriaEquipe.includes('egresso') ||
+            categoriaEquipe.includes('egressa');
+
+        const statusVisiveis = [
+            'ativo',
+            'ativa',
+            'alumni',
+            'alumini',
+            'egresso',
+            'egressa'
+        ];
+
+        return statusVisiveis.includes(status) || pertenceAAlumni;
     });
 }
 
-function obterContainerEquipe(categoriaEquipe, containers) {
-    const categoria = normalizarTexto(categoriaEquipe);
+function obterTipoProgramaAcademico(membro) {
+    const programa = normalizarTexto(
+        obterCampo(membro, [
+            'programa',
+            'programa_academico',
+            'tipo_programa',
+            'tipo_de_programa',
+            'nivel',
+            'nivel_academico',
+            'formacao',
+            'curso'
+        ])
+    );
 
-    if (categoria.includes('coord')) {
+    const cargo = normalizarTexto(
+        obterCampo(membro, ['cargo', 'funcao', 'posição', 'posicao'])
+    );
+
+    const textoBase = `${programa} ${cargo}`;
+
+    const indicadoresPosGraduacao = [
+        'pos',
+        'pós',
+        'mestrado',
+        'mestrando',
+        'mestranda',
+        'doutorado',
+        'doutorando',
+        'doutoranda',
+        'phd',
+        'msc',
+        'mestr'
+    ];
+
+    const indicadoresGraduacao = [
+        'graduacao',
+        'graduação',
+        'graduando',
+        'graduanda',
+        'aluno de graduacao',
+        'aluna de graduacao',
+        'aluno de graduação',
+        'aluna de graduação',
+        'iniciacao cientifica',
+        'iniciação científica',
+        'ic'
+    ];
+
+    if (indicadoresPosGraduacao.some(indicador => textoBase.includes(indicador))) {
+        return 'posgraduacao';
+    }
+
+    if (indicadoresGraduacao.some(indicador => textoBase.includes(indicador))) {
+        return 'graduacao';
+    }
+
+    // Fallback: se não vier informado na planilha,
+    // mantém em graduação para evitar que o membro desapareça.
+    return 'graduacao';
+}
+
+function obterContainerEquipe(membro, containers) {
+    const categoriaEquipe = normalizarTexto(
+        obterCampo(membro, ['equipe', 'grupo', 'categoria'])
+    );
+
+    if (categoriaEquipe.includes('coord')) {
         return containers.coordenadores;
     }
 
-    if (categoria.includes('iniciacao') || categoria.includes('ic')) {
-        return containers.ic;
+    if (
+        categoriaEquipe.includes('alumni') ||
+        categoriaEquipe.includes('alumini') ||
+        categoriaEquipe.includes('egresso') ||
+        categoriaEquipe.includes('egressa')
+    ) {
+        return containers.alumni;
     }
 
-    return containers.pesquisadores;
+    if (
+        categoriaEquipe.includes('pesquisador') ||
+        categoriaEquipe.includes('pesquisadores') ||
+        categoriaEquipe.includes('associado') ||
+        categoriaEquipe.includes('associados')
+    ) {
+        const tipoPrograma = obterTipoProgramaAcademico(membro);
+
+        if (tipoPrograma === 'posgraduacao') {
+            return containers.pesquisadoresPosGraduacao;
+        }
+
+        return containers.pesquisadoresGraduacao;
+    }
+
+    if (
+        categoriaEquipe.includes('iniciacao') ||
+        categoriaEquipe.includes('iniciação') ||
+        categoriaEquipe === 'ic'
+    ) {
+        return containers.pesquisadoresGraduacao;
+    }
+
+    console.warn('Membro sem categoria de equipe reconhecida:', membro);
+    return null;
 }
 
 function criarImagemMembro(nome, fotoNome) {
@@ -322,8 +446,9 @@ function criarImagemMembro(nome, fotoNome) {
 function renderizarEquipe(membros) {
     const containers = {
         coordenadores: document.querySelector('.equipe-coordenadores'),
-        pesquisadores: document.querySelector('.equipe-pesquisadores'),
-        ic: document.querySelector('.equipe-ic')
+        pesquisadoresGraduacao: document.querySelector('.equipe-pesquisadores-graduacao'),
+        pesquisadoresPosGraduacao: document.querySelector('.equipe-pesquisadores-posgraduacao'),
+        alumni: document.querySelector('.equipe-alumni')
     };
 
     Object.values(containers).forEach(container => {
@@ -335,7 +460,7 @@ function renderizarEquipe(membros) {
     if (!membros.length) {
         if (containers.coordenadores) {
             containers.coordenadores.appendChild(
-                criarMensagemSemDados('Nenhum membro ativo encontrado.')
+                criarMensagemSemDados('Nenhum membro encontrado.')
             );
         }
 
@@ -344,13 +469,12 @@ function renderizarEquipe(membros) {
 
     membros.forEach(membro => {
         const nome = obterCampo(membro, ['nome'], 'Nome não informado');
-        const cargo = obterCampo(membro, ['cargo'], 'Membro');
-        const categoriaEquipe = obterCampo(membro, ['equipe']);
+        const cargo = obterCampo(membro, ['cargo', 'funcao', 'posição', 'posicao'], 'Membro');
         const lattes = normalizarUrl(obterCampo(membro, ['lattes']));
         const linkedin = normalizarUrl(obterCampo(membro, ['linkedin']));
         const foto = obterCampo(membro, ['foto']);
 
-        const container = obterContainerEquipe(categoriaEquipe, containers);
+        const container = obterContainerEquipe(membro, containers);
 
         if (!container) return;
 
@@ -375,8 +499,28 @@ function renderizarEquipe(membros) {
         card.appendChild(links);
         container.appendChild(card);
     });
+
+    exibirMensagensEquipeVazia(containers);
 }
 
+function exibirMensagensEquipeVazia(containers) {
+    const mensagens = {
+        coordenadores: 'Nenhum membro de coordenação encontrado.',
+        pesquisadoresGraduacao: 'Nenhum pesquisador associado de graduação encontrado.',
+        pesquisadoresPosGraduacao: 'Nenhum pesquisador associado de pós-graduação encontrado.',
+        alumni: 'Nenhum alumni encontrado.'
+    };
+
+    Object.entries(containers).forEach(([chave, container]) => {
+        if (!container) return;
+
+        if (!container.children.length) {
+            container.appendChild(
+                criarMensagemSemDados(mensagens[chave])
+            );
+        }
+    });
+}
 // ============================================
 // PROJETOS
 // ============================================
