@@ -599,6 +599,16 @@ function criarImagemProjeto(titulo, status, valorImagem) {
     imagem.alt = titulo;
     imagem.loading = 'lazy';
 
+    // Forçar os estilos diretamente no Javascript para a imagem do Saúde Maré
+    if (titulo && titulo.toLowerCase().includes('maré')) {
+        imagem.style.transform = 'scale(1)';
+        imagem.style.objectFit = 'cover';
+        imagem.style.backgroundColor = 'white';
+        // Ajuste no height caso seja necessário para cobrir totalmente
+        imagem.style.height = '100%';
+        imagem.style.width = '100%';
+    }
+
     imagem.addEventListener('error', () => {
         wrapper.innerHTML = '';
         wrapper.appendChild(

@@ -731,8 +731,17 @@ textarea:focus-visible {
 .projeto-imagem img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
+}
+
+/* Aumentar especificamente a imagem do projeto Saúde Maré */
+.projeto-imagem img[alt*="Maré" i],
+.projeto-imagem img[alt*="Mare" i],
+.projeto-imagem img[src*="mare" i] {
+    transform: scale(2.2);
+    object-fit: cover;
+    background-color: white; /* Garante que o fundo branco ocupe todo o card se necessário */
 }
 
 .projeto-placeholder {

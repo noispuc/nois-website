@@ -33,13 +33,45 @@ class BannerSlider {
     }
 
     async loadImages() {
-        // Lista de banners exibidos na home.
-        // Futuramente, esses itens podem ser trocados por imagens locais em assets/images/banner/.
-        this.images = [
-            { src: 'https://placehold.co/1200x400/1a2b4c/white?text=NOIS+Research', alt: 'Pesquisa NOIS' },
-            { src: 'https://placehold.co/1200x400/2c3e66/white?text=Healthcare+Analytics', alt: 'Healthcare Analytics' },
-            { src: 'https://placehold.co/1200x400/00a3a3/white?text=Data+Science', alt: 'Data Science' }
-        ];
+        // ID da pasta fornecida
+        const folderId = '1LI-0O752A964jVGWviU3fIJ0AeRg7JqW';
+        // ATENÇÃO: Para ler o Google Drive via JavaScript no navegador, você precisará de uma API Key pública.
+        // Crie uma no Google Cloud Console com acesso à Google Drive API.
+        const apiKey = 'SUA_API_KEY_AQUI'; 
+        
+        try {
+            // Caso a API Key não tenha sido configurada, lançamos um erro para cair no fallback
+            if (apiKey === 'SUA_API_KEY_AQUI') {
+                throw new Error('API Key não configurada. Configure sua API Key no js/main.js');
+            }
+
+            const url = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${apiKey}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar imagens do Drive: HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            // Filtra apenas os arquivos que são imagens
+            const arquivosImagens = data.files.filter(file => file.mimeType.startsWith('image/'));
+            
+            // Mapeia os arquivos do Drive para o formato esperado pelo slider
+            this.images = arquivosImagens.map(file => ({
+                src: `https://drive.google.com/uc?export=view&id=${file.id}`,
+                alt: file.name.replace(/\.[^/.]+$/, "") // Remove a extensão (.jpg, .png) para usar como texto alternativo
+            }));
+
+        } catch (error) {
+            console.error('Erro ao carregar banners do Drive:', error);
+            // Fallback (plano B) caso a API falhe ou a chave não esteja configurada
+            this.images = [
+                { src: 'https://placehold.co/1200x400/1a2b4c/white?text=NOIS+Research', alt: 'Pesquisa NOIS' },
+                { src: 'https://placehold.co/1200x400/2c3e66/white?text=Healthcare+Analytics', alt: 'Healthcare Analytics' },
+                { src: 'https://placehold.co/1200x400/00a3a3/white?text=Data+Science', alt: 'Data Science' }
+            ];
+        }
     }
 
     createSlider() {
