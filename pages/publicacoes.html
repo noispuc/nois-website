@@ -6,7 +6,6 @@
     <title>NOIS - Publicações | PUC-Rio</title>
     <link rel="icon" href="../assets/images/nois.jpeg" type="image/jpeg">
     <link rel="stylesheet" href="../css/style.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body id="pagina-publicacoes">
@@ -38,7 +37,6 @@
     </header>
 
     <main>
-        <!-- Hero da página -->
         <section class="hero">
             <div class="container">
                 <h1>Publicações Científicas</h1>
@@ -46,21 +44,20 @@
             </div>
         </section>
 
-        <!-- Barra de busca e filtros -->
         <section class="filtros-publicacoes" aria-label="Busca e filtros de publicações">
             <div class="container">
                 <div class="filtros-linha">
                     <div class="busca-container">
-                        <input 
-                            type="text" 
-                            id="busca-input" 
-                            placeholder="🔍 Buscar por título, autor ou periódico..." 
+                        <input
+                            type="text"
+                            id="busca-input"
+                            placeholder="🔍 Buscar por título, autor ou periódico..."
                             class="busca-input"
                             aria-label="Buscar publicações por título, autor ou periódico"
                         >
                         <button type="button" id="buscar-btn" class="buscar-btn">Buscar</button>
                     </div>
-                    
+
                     <div class="filtros-acoes">
                         <div class="custom-select" id="ano-select-container">
                             <button type="button" class="select-trigger" id="ano-select-trigger">
@@ -69,10 +66,10 @@
                             </button>
 
                             <div class="select-dropdown" id="ano-select-dropdown">
-                                <input 
-                                    type="text" 
-                                    id="busca-ano-input" 
-                                    placeholder="🔍 Buscar ano..." 
+                                <input
+                                    type="text"
+                                    id="busca-ano-input"
+                                    placeholder="🔍 Buscar ano..."
                                     class="busca-ano-input"
                                     aria-label="Buscar ano da publicação"
                                 >
@@ -81,7 +78,6 @@
                                     <label class="select-option" data-ano="todos">
                                         <input type="radio" name="ano" value="todos" checked> 📅 Todos os anos
                                     </label>
-                                    <!-- Os anos serão preenchidos via JavaScript -->
                                 </div>
                             </div>
                         </div>
@@ -92,7 +88,6 @@
             </div>
         </section>
 
-        <!-- Lista de publicações renderizada pelo JavaScript -->
         <section class="publicacoes-section">
             <div class="container">
                 <div class="publicacoes-lista" id="publicacoes-lista" aria-live="polite">
@@ -108,7 +103,11 @@
                 <div class="footer-info">
                     <h3>NOIS - PUC-Rio</h3>
                     <p>Núcleo de Operações e Inteligência em Saúde</p>
-                    <p>Departamento de Engenharia Industrial</p>
+                    <p>
+                        Rua Marquês de São Vicente, 225<br>
+                        Edifício Cardeal Leme, 9º andar<br>
+                        Gávea, Rio de Janeiro - RJ
+                    </p>
                 </div>
 
                 <div class="footer-contato">
@@ -132,6 +131,7 @@
             </div>
         </div>
     </footer>
+
     <script src="../js/main.js"></script>
     <script src="../js/sheets.js"></script>
 </body>

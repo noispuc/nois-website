@@ -186,7 +186,8 @@ function localizarLinhaCabecalho(linhas, tipoAba) {
                 'link',
                 'equipe',
                 'descricao_do_projeto',
-                'temas_palavras_chaves'
+                'temas_palavras_chaves',
+                'financiadores'
             ]
         },
         publicacoes: {
@@ -279,7 +280,7 @@ async function carregarEquipe() {
         const status = normalizarStatus(obterCampo(membro, ['status']));
         const categoriaEquipe = normalizarTexto(
             obterCampo(membro, ['equipe', 'grupo', 'categoria'])
-        );
+        ).replace(/\s+/g, ' ');
 
         const statusOcultos = [
             'oculto',
@@ -294,11 +295,12 @@ async function carregarEquipe() {
             return false;
         }
 
-        const pertenceAAlumni =
-            categoriaEquipe.includes('alumni') ||
-            categoriaEquipe.includes('alumini') ||
-            categoriaEquipe.includes('egresso') ||
-            categoriaEquipe.includes('egressa');
+        const pertenceAAlumni = [
+            'alumni',
+            'alumini',
+            'egresso',
+            'egressa'
+        ].includes(categoriaEquipe);
 
         const statusVisiveis = [
             'ativo',
@@ -313,110 +315,31 @@ async function carregarEquipe() {
     });
 }
 
-function obterTipoProgramaAcademico(membro) {
-    const programa = normalizarTexto(
-        obterCampo(membro, [
-            'programa',
-            'programa_academico',
-            'tipo_programa',
-            'tipo_de_programa',
-            'nivel',
-            'nivel_academico',
-            'formacao',
-            'curso'
-        ])
-    );
-
-    const cargo = normalizarTexto(
-        obterCampo(membro, ['cargo', 'funcao', 'posição', 'posicao'])
-    );
-
-    const textoBase = `${programa} ${cargo}`;
-
-    const indicadoresPosGraduacao = [
-        'pos',
-        'pós',
-        'mestrado',
-        'mestrando',
-        'mestranda',
-        'doutorado',
-        'doutorando',
-        'doutoranda',
-        'phd',
-        'msc',
-        'mestr'
-    ];
-
-    const indicadoresGraduacao = [
-        'graduacao',
-        'graduação',
-        'graduando',
-        'graduanda',
-        'aluno de graduacao',
-        'aluna de graduacao',
-        'aluno de graduação',
-        'aluna de graduação',
-        'iniciacao cientifica',
-        'iniciação científica',
-        'ic'
-    ];
-
-    if (indicadoresPosGraduacao.some(indicador => textoBase.includes(indicador))) {
-        return 'posgraduacao';
-    }
-
-    if (indicadoresGraduacao.some(indicador => textoBase.includes(indicador))) {
-        return 'graduacao';
-    }
-
-    // Fallback: se não vier informado na planilha,
-    // mantém em graduação para evitar que o membro desapareça.
-    return 'graduacao';
-}
-
 function obterContainerEquipe(membro, containers) {
     const categoriaEquipe = normalizarTexto(
         obterCampo(membro, ['equipe', 'grupo', 'categoria'])
-    );
+    ).replace(/\s+/g, ' ');
 
-    if (categoriaEquipe.includes('coord')) {
-        return containers.coordenadores;
+    const categorias = {
+        coordenacao: containers.coordenadores,
+        'pesquisadores associados': containers.pesquisadoresAssociados,
+        'pesquisadores associados pos': containers.pesquisadoresPosGraduacao,
+        'pesquisadores associados grad': containers.pesquisadoresGraduacao,
+        alumni: containers.alumni
+    };
+
+    const container = categorias[categoriaEquipe];
+
+    if (!container) {
+        console.warn(
+            `Categoria de equipe não reconhecida: "${categoriaEquipe || 'vazia'}".`,
+            membro
+        );
+
+        return null;
     }
 
-    if (
-        categoriaEquipe.includes('alumni') ||
-        categoriaEquipe.includes('alumini') ||
-        categoriaEquipe.includes('egresso') ||
-        categoriaEquipe.includes('egressa')
-    ) {
-        return containers.alumni;
-    }
-
-    if (
-        categoriaEquipe.includes('pesquisador') ||
-        categoriaEquipe.includes('pesquisadores') ||
-        categoriaEquipe.includes('associado') ||
-        categoriaEquipe.includes('associados')
-    ) {
-        const tipoPrograma = obterTipoProgramaAcademico(membro);
-
-        if (tipoPrograma === 'posgraduacao') {
-            return containers.pesquisadoresPosGraduacao;
-        }
-
-        return containers.pesquisadoresGraduacao;
-    }
-
-    if (
-        categoriaEquipe.includes('iniciacao') ||
-        categoriaEquipe.includes('iniciação') ||
-        categoriaEquipe === 'ic'
-    ) {
-        return containers.pesquisadoresGraduacao;
-    }
-
-    console.warn('Membro sem categoria de equipe reconhecida:', membro);
-    return null;
+    return container;
 }
 
 function criarImagemMembro(nome, fotoNome) {
@@ -446,8 +369,9 @@ function criarImagemMembro(nome, fotoNome) {
 function renderizarEquipe(membros) {
     const containers = {
         coordenadores: document.querySelector('.equipe-coordenadores'),
-        pesquisadoresGraduacao: document.querySelector('.equipe-pesquisadores-graduacao'),
+        pesquisadoresAssociados: document.querySelector('.equipe-pesquisadores-associados'),
         pesquisadoresPosGraduacao: document.querySelector('.equipe-pesquisadores-posgraduacao'),
+        pesquisadoresGraduacao: document.querySelector('.equipe-pesquisadores-graduacao'),
         alumni: document.querySelector('.equipe-alumni')
     };
 
@@ -458,18 +382,18 @@ function renderizarEquipe(membros) {
     });
 
     if (!membros.length) {
-        if (containers.coordenadores) {
-            containers.coordenadores.appendChild(
-                criarMensagemSemDados('Nenhum membro encontrado.')
-            );
-        }
-
+        exibirMensagensEquipeVazia(containers);
         return;
     }
 
     membros.forEach(membro => {
         const nome = obterCampo(membro, ['nome'], 'Nome não informado');
-        const cargo = obterCampo(membro, ['cargo', 'funcao', 'posição', 'posicao'], 'Membro');
+        const cargo = obterCampo(
+            membro,
+            ['cargo', 'funcao', 'posição', 'posicao'],
+            'Membro'
+        );
+
         const lattes = normalizarUrl(obterCampo(membro, ['lattes']));
         const linkedin = normalizarUrl(obterCampo(membro, ['linkedin']));
         const foto = obterCampo(membro, ['foto']);
@@ -506,21 +430,21 @@ function renderizarEquipe(membros) {
 function exibirMensagensEquipeVazia(containers) {
     const mensagens = {
         coordenadores: 'Nenhum membro de coordenação encontrado.',
-        pesquisadoresGraduacao: 'Nenhum pesquisador associado de graduação encontrado.',
-        pesquisadoresPosGraduacao: 'Nenhum pesquisador associado de pós-graduação encontrado.',
+        pesquisadoresAssociados: 'Nenhum pesquisador associado encontrado.',
+        pesquisadoresPosGraduacao: 'Nenhum pesquisador de pós-graduação encontrado.',
+        pesquisadoresGraduacao: 'Nenhum pesquisador de graduação encontrado.',
         alumni: 'Nenhum alumni encontrado.'
     };
 
     Object.entries(containers).forEach(([chave, container]) => {
-        if (!container) return;
+        if (!container || container.children.length) return;
 
-        if (!container.children.length) {
-            container.appendChild(
-                criarMensagemSemDados(mensagens[chave])
-            );
-        }
+        container.appendChild(
+            criarMensagemSemDados(mensagens[chave])
+        );
     });
 }
+
 // ============================================
 // PROJETOS
 // ============================================
@@ -625,6 +549,25 @@ function criarImagemProjeto(titulo, status, valorImagem) {
     return wrapper;
 }
 
+
+function obterFinanciadoresProjeto(projeto) {
+    const valor = obterCampo(projeto, [
+        'financiadores',
+        'financiador',
+        'financiamento',
+        'apoio'
+    ]);
+
+    if (!valor) return [];
+
+    return [...new Set(
+        valor
+            .split(';')
+            .map(item => limparValor(item))
+            .filter(Boolean)
+    )];
+}
+
 function renderizarProjetos(projetos, filtro = 'todos') {
     const container = document.querySelector('.projetos-grid');
     const loader = document.getElementById('loader-projetos');
@@ -674,6 +617,7 @@ function renderizarProjetos(projetos, filtro = 'todos') {
         const link = normalizarUrl(valorLink);
         const imagem = obterCampo(projeto, ['imagem', 'foto', 'capa']);
         const status = obterStatusProjeto(projeto);
+        const financiadores = obterFinanciadoresProjeto(projeto);
 
         const tags = temas
             .split(/[;,]/)
@@ -732,6 +676,21 @@ function renderizarProjetos(projetos, filtro = 'todos') {
             equipeTexto.appendChild(document.createTextNode(equipe));
 
             card.appendChild(equipeTexto);
+        }
+
+        if (financiadores.length) {
+            const financiadoresTexto = document.createElement('p');
+            financiadoresTexto.className = 'projeto-financiadores';
+
+            const rotulo = document.createElement('strong');
+            rotulo.textContent = '💰 Financiadores: ';
+
+            financiadoresTexto.appendChild(rotulo);
+            financiadoresTexto.appendChild(
+                document.createTextNode(financiadores.join(', '))
+            );
+
+            card.appendChild(financiadoresTexto);
         }
 
         card.appendChild(
