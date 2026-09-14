@@ -348,18 +348,73 @@ function criarImagemMembro(nome, foto) {
 
     const fotoValor = (foto || '').trim();
 
+    // URL pública: usar diretamente
+    if (/^https?:\/\//i.test(fotoValor)) {
+        const imagem = document.createElement('img');
+        imagem.src = fotoValor;
+        imagem.alt = nome;
+        imagem.loading = 'lazy';
+
+        imagem.addEventListener('error', () => {
+            wrapper.innerHTML = '';
+            wrapper.appendChild(criarElementoTexto('div', '📷', 'foto-placeholder'));
+        });
+
+        wrapper.appendChild(imagem);
+        return wrapper;
+    }
+
     if (fotoValor.toLowerCase() === 'sem foto') {
+        // Tentar encontrar no manifesto pelo nome do membro antes de mostrar placeholder
+        const registry = window.NOISImageRegistry;
+
+        if (registry && registry.isReady()) {
+            const entry = registry.findImage(nome, 'team');
+
+            if (entry) {
+                const imagem = document.createElement('img');
+                imagem.src = registry.resolvePath(entry);
+                imagem.alt = nome;
+                imagem.loading = 'lazy';
+
+                imagem.addEventListener('error', () => {
+                    wrapper.innerHTML = '';
+                    wrapper.appendChild(criarElementoTexto('div', '📷', 'foto-placeholder'));
+                });
+
+                wrapper.appendChild(imagem);
+                return wrapper;
+            }
+        }
+
         wrapper.appendChild(criarElementoTexto('div', '📷', 'foto-placeholder'));
         return wrapper;
     }
 
-    let filename = fotoValor;
-    if (!filename) {
-        filename = nome + '.png';
+    // Tentar localizar no manifesto antes do path hardcoded
+    const registry = window.NOISImageRegistry;
+    let src = '';
+
+    if (registry && registry.isReady()) {
+        const entry = registry.findImage(fotoValor, 'team')
+            || registry.findImage(nome, 'team');
+
+        if (entry) {
+            src = registry.resolvePath(entry);
+        }
+    }
+
+    // Fallback: path direto como antes
+    if (!src) {
+        let filename = fotoValor;
+        if (!filename) {
+            filename = nome + '.png';
+        }
+        src = `../assets/images/equipe/${filename}`;
     }
 
     const imagem = document.createElement('img');
-    imagem.src = `../assets/images/equipe/${filename}`;
+    imagem.src = src;
     imagem.alt = nome;
     imagem.loading = 'lazy';
 
@@ -493,15 +548,36 @@ function obterStatusProjeto(projeto) {
     return 'ativo';
 }
 
-function obterFonteImagemProjeto(valorImagem) {
+function obterFonteImagemProjeto(valorImagem, tituloProjeto) {
     const imagem = limparValor(valorImagem);
+    const registry = window.NOISImageRegistry;
 
-    if (!imagem) return '';
+    if (!imagem) {
+        // Sem coluna de imagem: tentar localizar pelo título do projeto
+        if (tituloProjeto && registry && registry.isReady()) {
+            const entry = registry.findImage(tituloProjeto, 'project');
+
+            if (entry) {
+                return registry.resolvePath(entry);
+            }
+        }
+
+        return '';
+    }
 
     const urlPublica = normalizarUrl(imagem);
 
     if (urlPublica) {
         return urlPublica;
+    }
+
+    // Tentar localizar no manifesto antes do path direto
+    if (registry && registry.isReady()) {
+        const entry = registry.findImage(imagem, 'project');
+
+        if (entry) {
+            return registry.resolvePath(entry);
+        }
     }
 
     return `../assets/images/projetos/${imagem}`;
@@ -511,7 +587,7 @@ function criarImagemProjeto(titulo, status, valorImagem) {
     const wrapper = document.createElement('div');
     wrapper.className = 'projeto-imagem';
 
-    const fonteImagem = obterFonteImagemProjeto(valorImagem);
+    const fonteImagem = obterFonteImagemProjeto(valorImagem, titulo);
 
     if (!fonteImagem) {
         wrapper.appendChild(
@@ -1213,6 +1289,12 @@ async function inicializarPagina() {
     const paginaAtualId = document.body.id || '';
 
     try {
+        // Garantir que o manifesto de imagens esteja carregado antes de renderizar.
+        // O init() usa cache interno, então múltiplas chamadas não geram fetch duplicado.
+        if (window.NOISImageRegistry) {
+            await window.NOISImageRegistry.init();
+        }
+
         if (paginaAtualId === 'pagina-equipe') {
             const membros = await carregarEquipe();
             await renderizarEquipe(membros);

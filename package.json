@@ -1,0 +1,11 @@
+{
+  "name": "nois-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync:drive": "node scripts/sync-google-drive-images.mjs"
+  },
+  "dependencies": {
+    "googleapis": "173.0.0"
+  }
+}

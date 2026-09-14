@@ -1,0 +1,59 @@
+name: Sync Google Drive Images
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  sync-drive-images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Check Google credentials
+        env:
+          GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          node -e "
+            const c = JSON.parse(process.env.GDRIVE_SERVICE_ACCOUNT_JSON);
+            console.log('Google Project:', c.project_id);
+            console.log('Service Account:', c.client_email);
+            "
+            
+      - name: Sync images from Google Drive
+        run: npm run sync:drive
+        env:
+          GDRIVE_ROOT_FOLDER_ID: ${{ secrets.GDRIVE_ROOT_FOLDER_ID }}
+          GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
+
+      - name: Commit updated images and JSON
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ -n "$(git status --porcelain)" ]; then
+            git add assets/images/banner assets/images/equipe assets/images/projetos data/images.json
+            git commit -m "chore: sync Google Drive images"
+            git push
+          else
+            echo "No changes to commit."
+          fi
